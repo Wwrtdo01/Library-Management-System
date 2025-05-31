@@ -12,7 +12,6 @@ public class LibraryGUI extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         showAdminWindow();  // Build the interface on this frame
     }
-
     private void showAdminWindow() {
         JButton addBook = new JButton("اضافة كتاب");
         JButton deleteBook = new JButton("حذف كتاب");
@@ -38,6 +37,7 @@ public class LibraryGUI extends JFrame {
         JFrame form = new JFrame("اضافة كتاب");
         form.setSize(400, 300);
         form.setLocationRelativeTo(null);
+        form.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         JTextField titleField = new JTextField(20);
         JTextField authorField = new JTextField(20);
@@ -93,6 +93,7 @@ public class LibraryGUI extends JFrame {
         JFrame frame = new JFrame("قائمة الكتب");
         frame.setSize(500, 400);
         frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         JTextArea textA = new JTextArea();
         textA.setEditable(false);
@@ -113,6 +114,7 @@ public class LibraryGUI extends JFrame {
         JFrame frame = new JFrame("حذف كتاب");
         frame.setSize(300, 150);
         frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel(new GridLayout(2, 2, 5, 5));
         JLabel label = new JLabel("ادخل رقم الكتاب");
@@ -152,6 +154,7 @@ public class LibraryGUI extends JFrame {
         JFrame frame = new JFrame("البحث عن كتاب");
         frame.setSize(400, 200);
         frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         JLabel label = new JLabel("أدخل عنوان الكتاب");
         JTextField searchField = new JTextField();
@@ -187,6 +190,7 @@ public class LibraryGUI extends JFrame {
         JFrame frame = new JFrame("نتائج البحث");
         frame.setSize(600, 400);
         frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         JTextArea textArea = new JTextArea();
         textArea.setEditable(false);
