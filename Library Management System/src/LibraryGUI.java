@@ -1,44 +1,41 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class LibraryGUI extends JFrame {
-
     private final Library library = new Library();
-    private JTextArea textArea;
 
     public LibraryGUI() {
-        setTitle("مكتبة الإدارة");
-        setSize(700, 500);
+        setTitle("لوحة التحكم - المكتبة");
+        setSize(400, 300);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        textArea = new JTextArea();
-        textArea.setFont(new Font("Serif", Font.PLAIN, 16));
-        textArea.setEditable(false);
-
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        add(scrollPane, BorderLayout.CENTER);
-
         JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
+        buttonPanel.setBackground(Color.WHITE);
 
-        JButton addBookBtn = new JButton("إضافة كتاب");
-        JButton showBooksBtn = new JButton("عرض الكتب");
-        JButton removeBookBtn = new JButton("حذف كتاب");
-        JButton searchBookBtn = new JButton("البحث عن كتاب");
+        JButton addBookBtn = new JButton("➕ إضافة كتاب");
+        JButton showBooksBtn = new JButton("📚 عرض الكتب");
+        JButton searchBookBtn = new JButton("🔍 البحث عن كتاب");
+        JButton removeBookBtn = new JButton("🗑️ حذف كتاب");
 
-        buttonPanel.add(addBookBtn);
-        buttonPanel.add(showBooksBtn);
-        buttonPanel.add(removeBookBtn);
-        buttonPanel.add(searchBookBtn);
+        JButton[] buttons = { addBookBtn, showBooksBtn, searchBookBtn, removeBookBtn };
+        for (JButton btn : buttons) {
+            btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+            btn.setMaximumSize(new Dimension(250, 40));
+            buttonPanel.add(btn);
+            buttonPanel.add(Box.createVerticalStrut(15));
+        }
 
-        add(buttonPanel, BorderLayout.NORTH);
+        add(buttonPanel);
 
+        // Action listeners
         addBookBtn.addActionListener(e -> addBookDialog());
-        showBooksBtn.addActionListener(e -> showBooks());
+        showBooksBtn.addActionListener(e -> showBooksWindow());
+        searchBookBtn.addActionListener(e -> searchBookWindow());
         removeBookBtn.addActionListener(e -> removeBookDialog());
-        searchBookBtn.addActionListener(e -> searchBookDialog());
-
-        
     }
 
     private void addBookDialog() {
@@ -76,7 +73,6 @@ public class LibraryGUI extends JFrame {
 
                 if (success) {
                     JOptionPane.showMessageDialog(this, "تم إضافة الكتاب بنجاح");
-                    showBooks();
                 } else {
                     JOptionPane.showMessageDialog(this, "فشل في إضافة الكتاب");
                 }
@@ -86,9 +82,46 @@ public class LibraryGUI extends JFrame {
         }
     }
 
-    private void showBooks() {
-        String booksStr = library.printBooks();
-        textArea.setText(booksStr);
+    private void showBooksWindow() {
+        JFrame frame = new JFrame("عرض الكتب");
+        frame.setSize(600, 400);
+        frame.setLocationRelativeTo(null);
+
+        JTextArea textArea = new JTextArea();
+        textArea.setEditable(false);
+        textArea.setBackground(Color.BLACK);
+        textArea.setForeground(Color.RED);
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        textArea.setText(library.printBooks());
+
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        frame.add(scrollPane);
+
+        frame.setVisible(true);
+    }
+
+    private void searchBookWindow() {
+        String title = JOptionPane.showInputDialog(this, "أدخل عنوان الكتاب للبحث:");
+
+        if (title != null && !title.trim().isEmpty()) {
+            JFrame frame = new JFrame("نتائج البحث");
+            frame.setSize(600, 400);
+            frame.setLocationRelativeTo(null);
+
+            JTextArea textArea = new JTextArea();
+            textArea.setEditable(false);
+            textArea.setBackground(Color.BLACK);
+            textArea.setForeground(Color.RED);
+            textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+            textArea.setText(library.searchBookByTitle(title.trim()));
+
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            frame.add(scrollPane);
+
+            frame.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "لم يتم إدخال عنوان");
+        }
     }
 
     private void removeBookDialog() {
@@ -100,22 +133,12 @@ public class LibraryGUI extends JFrame {
                 boolean success = library.removeBook(id);
                 if (success) {
                     JOptionPane.showMessageDialog(this, "تم حذف الكتاب");
-                    showBooks();
                 } else {
                     JOptionPane.showMessageDialog(this, "فشل في حذف الكتاب");
                 }
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "يرجى إدخال رقم صحيح");
             }
-        }
-    }
-
-    private void searchBookDialog() {
-        String title = JOptionPane.showInputDialog(this, "أدخل عنوان الكتاب للبحث:");
-
-        if (title != null) {
-            String results = library.searchBookByTitle(title.trim());
-            textArea.setText(results);
         }
     }
 }
