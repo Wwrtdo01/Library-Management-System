@@ -2,11 +2,11 @@ import javax.swing.*;
 import java.awt.*;
 
 public class LoginWindow extends JFrame {
-    Library library = new Library();
-    JTextField usernameField;
-    JPasswordField passwordField;
-    JCheckBox showPass;
-    JButton loginButton, createAccountButton;
+    private final Library library = new Library();
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    private JCheckBox showPass;
+    private JButton loginButton, createAccountButton;
 
     public LoginWindow() {
         setTitle("تسجيل الدخول إلى النظام");
@@ -51,7 +51,7 @@ public class LoginWindow extends JFrame {
         setVisible(true);
     }
 
-    private void handleLogin() { // entering login data
+    private void handleLogin() {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
 
@@ -60,15 +60,35 @@ public class LoginWindow extends JFrame {
             return;
         }
 
-        boolean exists = library.authenticateAdmin(username, password);
-        if (exists) {
-            JOptionPane.showMessageDialog(this, "تم تسجيل الدخول بنجاح");
-            LibraryGUI gui = new LibraryGUI(); 
-            gui.setVisible(true);              
-            this.dispose(); 
-        } else {
-            JOptionPane.showMessageDialog(this, "المستخدم غير موجود أو كلمة المرور خاطئة");
-        }
+        loginButton.setEnabled(false);
+        createAccountButton.setEnabled(false);
+
+        new SwingWorker<Boolean, Void>() {
+            @Override
+            protected Boolean doInBackground() {
+                return library.authenticateAdmin(username, password);
+            }
+
+            @Override
+            protected void done() {
+                loginButton.setEnabled(true);
+                createAccountButton.setEnabled(true);
+                try {
+                    boolean success = get();
+                    if (success) {
+                        JOptionPane.showMessageDialog(LoginWindow.this, "تم تسجيل الدخول بنجاح");
+                        LibraryGUI gui = new LibraryGUI();
+                        gui.setVisible(true);
+                        dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(LoginWindow.this, "المستخدم غير موجود أو كلمة المرور خاطئة");
+                    }
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(LoginWindow.this, "حدث خطأ في الاتصال بالخادم");
+                    e.printStackTrace();
+                }
+            }
+        }.execute();
     }
 
     private void handleCreateAccount() {
@@ -80,27 +100,38 @@ public class LoginWindow extends JFrame {
             return;
         }
 
-        if (isUsernameExists(username)) {
-            JOptionPane.showMessageDialog(this, "اسم المستخدم موجود مسبقًا، يرجى تسجيل الدخول");
-            return;
-        }
+        loginButton.setEnabled(false);
+        createAccountButton.setEnabled(false);
 
-        if (addNewAdmin(username, password)) {
-            JOptionPane.showMessageDialog(this, "تم إنشاء الحساب بنجاح، يمكنك الآن تسجيل الدخول");
-        } else {
-            JOptionPane.showMessageDialog(this, "فشل في إنشاء الحساب، حاول لاحقًا");
-        }
-    }
+        new SwingWorker<Boolean, Void>() {
+            @Override
+            protected Boolean doInBackground() {
+                if (library.isUsernameExists(username)) {
+                    return false;
+                }
+                return library.registerAdmin(username, password);
+            }
 
-    private boolean isUsernameExists(String username) {
-        return library.isUsernameExists(username);
-    }
-
-    private boolean addNewAdmin(String username, String password) {
-        return library.registerAdmin(username, password);
+            @Override
+            protected void done() {
+                loginButton.setEnabled(true);
+                createAccountButton.setEnabled(true);
+                try {
+                    boolean success = get();
+                    if (success) {
+                        JOptionPane.showMessageDialog(LoginWindow.this, "تم إنشاء حساب جديد");
+                    } else {
+                        JOptionPane.showMessageDialog(LoginWindow.this, "اسم المستخدم موجود مسبقاً");
+                    }
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(LoginWindow.this, "حدث خطأ في الاتصال بالخادم");
+                    e.printStackTrace();
+                }
+            }
+        }.execute();
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LoginWindow());
+        SwingUtilities.invokeLater(LoginWindow::new);
     }
 }
